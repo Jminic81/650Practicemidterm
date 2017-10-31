@@ -1,0 +1,67 @@
+---
+title: "UK Car Accidents 2005"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+accidents<-read.csv("Accidents0515.csv",header=TRUE,stringsAsFactors=FALSE)
+df<-accidents
+df$Date<-dmy(df$Date)
+df<-df%>%
+  filter(Date<="2005-12-31")
+df$Day_of_Week<-factor(df$Day_of_Week,levels=c("1","2","3","4","5","6","7"))
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Daily Number of Accidents 2005
+
+```{r}
+temp_df<-df%>%
+  group_by(Date)%>%
+  summarize(acc_num=n())
+
+ggplot()+
+  geom_line(data=temp_df,aes(x=Date,y=acc_num))+
+  ylab("Number of Accidents")
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Daily Number of Accidents December 2005
+
+```{r}
+temp_df<-df%>%
+  filter(Date>="2005-12-01")%>%
+  group_by(Date)%>%
+  summarize(acc_num=n())
+
+ggplot()+
+  geom_line(data=temp_df,aes(x=Date,y=acc_num))+
+  ylab("Number of Accidents")+
+  scale_x_date(date_breaks='1 day',date_labels='%d')
+```
+
+### Chart C
+
+```{r}
+temp_df<-df%>%
+  group_by(Day_of_Week)%>%
+  summarize(acc_num=n())
+
+ggplot()+
+  geom_bar(data=temp_df,aes(x=Day_of_Week,y=acc_num),stat='identity',color='blue',fill='white')+
+  xlab('Weekday')+
+  ylab('Number of Accidents')
+```
+
